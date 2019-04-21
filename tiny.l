@@ -78,6 +78,7 @@ number	{digits}|({digits}"."{digits})
 "!=" {return (RELOP);}
 {id} {return (ID);}
 {number} {return (NUM);}
+. {return (ERR);}
 
 %%
 int yywrap(){
