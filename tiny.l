@@ -22,68 +22,62 @@
 #define EQ 20
 #define NE 21
 #define ID 22
-#define NUMBER 23
+#define NUM 23
 #define ERR 24
+#define NEWLINE 25
+#define RELOP 26
+#define WHILE 27
+#define ENDWHILE 28
+#define DO 29
+#define TO 30
+#define DOWNTO 31
+#define FOR 32
+#define ENDDO 33
 
-int yylval;
 %}
 
 delim	[ \t \n]
 ws	{delim}+
-Digit	[0-9]
+digit	[0-9]
 letter	[A-Za-z_]
-id	{letter}({letter}|{Digit})*
-Digits	{Digit}|({Digit}{Digits})
-Number	{Digits}|({Digits}\.{Digits})
+id	{letter}({letter}|{digit})*
+digits	{digit}+
+number	{digits}|({digits}"."{digits})
 
-Type	"INT"|"REAL"
-FormalParam {Type}" "{id}
-FormalParams [{FormalParam}(','{FormalParam})*]
-Block "BEGIN({Statement})*"END"
-Statement {Block}|{LocalVarDecl}|{AssignStmt}|{ReturnStmt}|{IfStmt}|{WriteStmt}|{ReadStmt}
-LocalVarDecl "INT"' '{id}';'|"REAL"' '{id}';'
-PrimaryExpr {Number}|{id}|'('{Expression}')'|{id}'('{ActualParams}')'
-MultiplicativeExpr {primaryExpr}(('*'|'/')PrimaryExpr)*
-Expression {MultplicativeExpr}(('+'|'-')MultiplicativeExpr)*
-BoolExpression {Expression}"=="{Expression}|{Expression}"!="{Expression}
-ActualParams [{Expression}(','{Expression})*]
-AssignStmt {id}":="{Expression}';'
-ReturnStmt {RETURN}' '{Expression}';'
-IfStmt "IF"'('{BoolExpression}')'Statement
-WriteStmt "WRITE"'('{Expression}','{QString}')'';'
-ReadStmt "READ"'('{id}','{QString}')'';' 
-MethodDecl {Type}["MAIN"]{id}'('{FormalParams}')'{Block}
-%s COMMENT 
 
 %%
-<INITIAL>"/**"	{BEGIN COMMENT}
-<COMMENT>"**/"	{BEGIN INITIAL}
 
 {ws} {;}
-"IF" {return IF;}
-"ELSE" {return ELSE;}
-"WRITE" {return WRITE;}
-"READ" {return READ;}
-"RETURN" {return RETURN;}
-"BEGIN" {return BEGIN;}
-"END" {return END;}
-"MAIN" {return MAIN;}
-"INT" {return INT;}
-"REAL" {return REAL;}
-";" {yylval=SC;return RELOP;}
-"," {yylval=CM;return RELOP;}
-"(" {yylval=OP;return RELOP;}
-")" {yylval=CP;return RELOP;}
-"+" {yylval=PL;return RELOP;}
-"-" {yylval=MN;return RELOP;}
-"*" {yylval=MP;return RELOP;}
-"/" {yylval=DV;retutn RELOP;}
-"=" {yylval=AS;return RELOP;}
-"==" {yylval=EQ;return RELOP;}
-"!=" {yylval=NE;return RELOP;}
-{id} {yylval=ID;return ID;}
-{Number} {yylval=NUMBER;return NUMBER;}
-. {yylval=ERR;return ERR;}
+"IF" {return (IF);}
+"ELSE" {return (ELSE);}
+"WRITE" {return (WRITE);}
+"READ" {return (READ);}
+"RETURN" {return (RETURN);}
+"BEGIN" {return (_BEGIN);}
+"END" {return (_END);}
+"MAIN" {return (MAIN);}
+"INT" {return (INT);}
+"REAL" {return (REAL);}
+"WHILE" {return (WHILE);}
+"ENDWHILE" {return (ENDWHILE);}
+"DO" {return (DO);}
+"TO" {return (TO);}
+"DOWNTO" {return (DOWNTO);}
+"FOR" {return (FOR);}
+"ENDDO" {return (ENDDO);}
+";" {return (RELOP);}
+"," {return (RELOP);}
+"(" {return (RELOP);}
+")" {return (RELOP);}
+"+" {return (RELOP);}
+"-" {return (RELOP);}
+"*" {return (RELOP);}
+"/" {return (RELOP);}
+"=" {return (RELOP);}
+"==" {return (RELOP);}
+"!=" {return (RELOP);}
+{id} {return (ID);}
+{number} {return (NUM);}
 
 %%
 int yywrap(){
@@ -93,4 +87,52 @@ void writeout(int c){
 	switch(c){
 	case ERR: fprintf(yyout, "ERRCHAR: %s", yytext);break;
 	case RELOP: fprintf(yyout,"RELOP: %s",yytext);break;
-	case 
+	case ID: fprintf(yyout,"IDENTIFIER: %s",yytext);break;
+	case NUM: fprintf(yyout,"NUMBER: %s",yytext);break;
+	case IF: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case ELSE: fprintf(yyout,"RESERVED WORD: %s",yytext);break;
+	case WRITE: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case READ: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case RETURN: fprintf(yyout,"RESERVED WORD: %s",yytext);break;
+	case _BEGIN: fprintf(yyout,"RESERVED WORD: %s",yytext);break;
+	case _END: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case MAIN: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case INT: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case REAL: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case WHILE: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case ENDWHILE: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case DO: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case TO:fprintf(yyout,"RESERVED WORD: %s",yytext);break;
+	case DOWNTO: fprintf(yyout,"RESERVED WORD: %s",yytext);break;
+	case FOR: fprintf(yyout,"RESERVED WORD: %s",yytext);break;
+	case ENDDO: fprintf(yyout, "RESERVED WORD: %s",yytext);break;
+	case NEWLINE: fprintf(yyout,"\n");break;
+	default: break;
+	}
+	return;
+}
+int main(int argc, char **argv)
+{
+	int c;
+	if(argc>=2)
+	{
+		if((yyin=fopen(argv[1],"r"))==NULL)
+		{
+			printf("Can not open file: %s\n",argv[1]);
+			return 1;
+		}
+		if(argc>=3)
+			yyout=fopen(argv[2],"w");
+	}
+	while(c=yylex())
+	{
+		writeout(c);
+		writeout(NEWLINE);
+	}
+	if(argc>=2)
+	{
+		fclose(yyin);
+		if(argc>=3) fclose(yyout);
+	}
+	return 0;
+}
