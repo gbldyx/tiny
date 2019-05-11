@@ -13,7 +13,9 @@ digit	[0-9]
 letter	[A-Za-z_]
 id	{letter}({letter}|{digit})*
 digits	{digit}+
-number	{digits}|({digits}"."{digits})
+integer	{digits}
+real	{digits}"."{digits}
+
 
 
 %%
@@ -24,8 +26,8 @@ number	{digits}|({digits}"."{digits})
 "WRITE" {return (WRITE);}
 "READ" {return (READ);}
 "RETURN" {return (RETURN);}
-"BEGIN" {return (_BEGIN);}
-"END" {return (_END);}
+"BEGIN" {return (BEGIN);}
+"END" {return (END);}
 "MAIN" {return (MAIN);}
 "INT" {return (INT);}
 "REAL" {return (REAL);}
@@ -36,11 +38,13 @@ number	{digits}|({digits}"."{digits})
 "DOWNTO" {return (DOWNTO);}
 "FOR" {return (FOR);}
 "ENDDO" {return (ENDDO);}
-[;,()-+*/=] {return *yytext;}
+[;,()-+*/] {return *yytext;}
+":=" {return AS;}
 "==" {return EQ;}
 "!=" {return NE;}
 {id} {return (ID);}
-{number} {return (NUM);}
+{integer} {return (Int);}
+{real} {return Real;}
 . {yyerror("Unknown character";}
 
 %%
