@@ -1,9 +1,13 @@
 %{
 #include<stdio.h>
 #include<stdlib.h>
-#include"y.tab.h"
+#include<string.h>
+#include"tiny.tab.h"
 #include"tiny.h"
-void yyerror(char *);
+void yyerror(char *s);
+char* s;
+char buf[100];
+//extern Node* yylval;
 
 %}
 
@@ -13,24 +17,35 @@ digit	[0-9]
 letter	[A-Za-z_]
 id	{letter}({letter}|{digit})*
 digits	{digit}+
-integer	{digits}
-real	{digits}"."{digits}
-
-
+intnum	{digits}
+realnum {digits}"."{digits}
+string	\"(\\.|[^"\\])*\"
+%x STRING
+%s COMMENT
 
 %%
 
+"/**"	{BEGIN COMMENT;}
+<COMMENT>"**/" {BEGIN 0;}
+<COMMENT>.|\n	{;}
+\"	{BEGIN STRING;s=buf;}
+<STRING>\\n	{*s++ ='\n';}
+<STRING>\\t	{*s++ ='\t';}
+<STRING>\\\"	{*s++ ='\"';}
+<STRING>\"	{*s=0;BEGIN 0;yylval=newNode(s);return QString;}
+<STRING>\n	{printf("invalid string");}
+<STRING>.	{*s++ =*yytext;}
 {ws} {;}
-"IF" {return (IF);}
-"ELSE" {return (ELSE);}
-"WRITE" {return (WRITE);}
-"READ" {return (READ);}
-"RETURN" {return (RETURN);}
-"BEGIN" {return (BEGIN);}
-"END" {return (END);}
+"IF" {return IF;}
+"ELSE" {return ELSE;}
+"WRITE" {return WRITE;}
+"READ" {return READ;}
+"RETURN" {return RETURN;}
+"BEGIN" {return (_BEGIN);}
+"END" {return END;}
 "MAIN" {return (MAIN);}
-"INT" {return (INT);}
-"REAL" {return (REAL);}
+"INT" {yylval=newNode("INT");return (INT);}
+"REAL" {yylval=newNode("REAL");return (REAL);}
 "WHILE" {return (WHILE);}
 "ENDWHILE" {return (ENDWHILE);}
 "DO" {return (DO);}
@@ -39,13 +54,13 @@ real	{digits}"."{digits}
 "FOR" {return (FOR);}
 "ENDDO" {return (ENDDO);}
 [;,()-+*/] {return *yytext;}
-":=" {return AS;}
-"==" {return EQ;}
-"!=" {return NE;}
-{id} {return (ID);}
-{integer} {return (Int);}
-{real} {return Real;}
-. {yyerror("Unknown character";}
+":=" {yylval=newNode("AS");return AS;}
+"==" {yylval=newNode("EQ");return EQ;}
+"!=" {yylval=newNode("NE");return NE;}
+{id} { yylval=newNode(yytext); return ID;}
+{intnum} {yylval=newNode(yytext);return INTNUM;}
+{realnum} {yylval=newNode(yytext);return REALNUM;}
+. {yyerror("Unknown character");}
 
 %%
 int yywrap(){
