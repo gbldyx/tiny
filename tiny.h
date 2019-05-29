@@ -1,13 +1,20 @@
-typedef enum { typeCon, typeId, typeOpr} nodeEnum;
+//typedef enum { typeCon, typeId, typeOpr} nodeEnum;
+//typedef enum {op, intcon, realcon, id, rw} Type;
+//typedef enum {MD, FP, BL, TY, stmt, LVD, AS, RT, IF, WT, RD, 
 
-typedef struct{
+/*typedef struct{
 	nodeEnum type;
 	int value;
-}conNodeType;
+}intConNodeType;
 
 typedef struct{
 	nodeEnum type;
-	int i;
+	float value;
+}realConNodeType;
+
+typedef struct{
+	nodeEnum type;
+	char* name; 
 }idNodeType;
 
 typedef struct{
@@ -19,10 +26,21 @@ typedef struct{
 
 typedef union nodeTypeTag{
 	nodeEnum type;
-	conNodeType con;
+	intConNodeType icon;
+	realConNodetype rcon;
 	idNodeType id;
 	oprNodeType opr;
 }nodeType;
+*/
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct Node{
+	struct Node* child;
+	struct Node* sibling;
+	int noChild;
+	char* name;
+}Node;
 
-extern int sym[26];
-
+Node* newNode(char *name);
+void insert(Node* parent,Node* child);
+void printTree(Node* t);

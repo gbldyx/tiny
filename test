@@ -1,0 +1,4 @@
+INT MAIN f1(INT a)
+BEGIN
+INT i;
+END
