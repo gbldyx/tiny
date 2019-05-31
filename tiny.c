@@ -9,7 +9,9 @@ Node* newNode(char* name)
 	}
 	else
 	{
-		p->name=name;
+		//p->name=name;
+		strcpy(p->name,name);
+		printf("%s\n",name);
 		p->child=NULL;
 		p->sibling=NULL;
 		p->noChild=0;
@@ -23,6 +25,7 @@ void insert(Node* parent,Node* child)
 	{
 		parent->child=child;
 		parent->noChild++;
+		//printf("parent: %s  child: %s\n",parent->name,parent->child->name);
 	}
 	else
 	{
@@ -32,18 +35,23 @@ void insert(Node* parent,Node* child)
 			p=p->sibling;
 		}
 		p->sibling=child;
-		p->noChild++;
+		parent->noChild++;
+		//printf("parent: %s  child: %s  sibling: %s\n",parent->name,parent->child->name,p->sibling->name);
 	}
 }
-void printTree(Node* t){
+void printTree(Node* t,int depth){
 	if(t!=NULL)
 	{
 		Node* s=t->child;
+		for(int i=0;i<depth;i++)
+		{
+			printf(" ");
+		}
 		printf("%s\n",t->name);
-		printTree(s);
+		printTree(s,depth+1);
 		for(int i=1;i<(t->noChild);i++)
 		{
-			printTree(s->sibling);
+			printTree(s->sibling,depth+1);
 			s=s->sibling;
 		}
 	}

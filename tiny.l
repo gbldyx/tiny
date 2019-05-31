@@ -19,9 +19,8 @@ id	{letter}({letter}|{digit})*
 digits	{digit}+
 intnum	{digits}
 realnum {digits}"."{digits}
-string	\"(\\.|[^"\\])*\"
 %x STRING
-%s COMMENT
+%x COMMENT
 
 %%
 
@@ -32,7 +31,7 @@ string	\"(\\.|[^"\\])*\"
 <STRING>\\n	{*s++ ='\n';}
 <STRING>\\t	{*s++ ='\t';}
 <STRING>\\\"	{*s++ ='\"';}
-<STRING>\"	{*s=0;BEGIN 0;yylval.nPtr=newNode(s);return QString;}
+<STRING>\"	{*s=0;BEGIN 0;yylval.nPtr=newNode(buf);return QString;}
 <STRING>\n	{printf("invalid string");}
 <STRING>.	{*s++ =*yytext;}
 {ws} {;}
@@ -53,10 +52,10 @@ string	\"(\\.|[^"\\])*\"
 "DOWNTO" {return (DOWNTO);}
 "FOR" {return (FOR);}
 "ENDDO" {return (ENDDO);}
-[;,()-+*/] {return *yytext;}
-":=" {yylval.nPtr=newNode("AS");return AS;}
-"==" {yylval.nPtr=newNode("EQ");return EQ;}
-"!=" {yylval.nPtr=newNode("NE");return NE;}
+[-;,()+*/] {return *yytext;}
+":=" {return AS;}
+"==" {return EQ;}
+"!=" {return NE;}
 {id} { yylval.nPtr=newNode(yytext); return ID;}
 {intnum} {yylval.nPtr=newNode(yytext);return INTNUM;}
 {realnum} {yylval.nPtr=newNode(yytext);return REALNUM;}
@@ -66,4 +65,3 @@ string	\"(\\.|[^"\\])*\"
 int yywrap(){
 	return 1;
 }
-

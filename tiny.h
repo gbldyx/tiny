@@ -32,15 +32,16 @@ typedef union nodeTypeTag{
 	oprNodeType opr;
 }nodeType;
 */
+#include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
 typedef struct Node{
 	struct Node* child;
 	struct Node* sibling;
 	int noChild;
-	char* name;
+	char name[100];
 }Node;
 
 Node* newNode(char *name);
 void insert(Node* parent,Node* child);
-void printTree(Node* t);
+void printTree(Node* t,int depth);
