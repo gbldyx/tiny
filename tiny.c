@@ -11,7 +11,7 @@ Node* newNode(char* name)
 	{
 		//p->name=name;
 		strcpy(p->name,name);
-		printf("%s\n",name);
+		//printf("%s\n",name);
 		p->child=NULL;
 		p->sibling=NULL;
 		p->noChild=0;
