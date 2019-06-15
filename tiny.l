@@ -7,7 +7,6 @@
 void yyerror(char *s);
 char* s;
 char buf[100];
-//extern Node* yylval;
 
 %}
 
@@ -31,7 +30,7 @@ realnum {digits}"."{digits}
 <STRING>\\n	{*s++ ='\n';}
 <STRING>\\t	{*s++ ='\t';}
 <STRING>\\\"	{*s++ ='\"';}
-<STRING>\"	{*s=0;BEGIN 0;yylval.nPtr=newNode(buf);return QString;}
+<STRING>\"	{*s=0;BEGIN 0;yylval.entry=storeStr(buf);return QString;}
 <STRING>\n	{printf("invalid string");}
 <STRING>.	{*s++ =*yytext;}
 {ws} {;}
@@ -43,8 +42,8 @@ realnum {digits}"."{digits}
 "BEGIN" {return (_BEGIN);}
 "END" {return END;}
 "MAIN" {return (MAIN);}
-"INT" {yylval.nPtr=newNode("INT");return (INT);}
-"REAL" {yylval.nPtr=newNode("REAL");return (REAL);}
+"INT" {return (INT);}
+"REAL" {return (REAL);}
 "WHILE" {return (WHILE);}
 "ENDWHILE" {return (ENDWHILE);}
 "DO" {return (DO);}
@@ -56,9 +55,9 @@ realnum {digits}"."{digits}
 ":=" {return AS;}
 "==" {return EQ;}
 "!=" {return NE;}
-{id} { yylval.nPtr=newNode(yytext); return ID;}
-{intnum} {yylval.nPtr=newNode(yytext);return INTNUM;}
-{realnum} {yylval.nPtr=newNode(yytext);return REALNUM;}
+{id} {yylval.entry=find(yytext);return ID;}
+{intnum} {yylval.intcon=atoi(yytext);return INTNUM;}
+{realnum} {yylval.realcon=atof(yytext);return REALNUM;}
 . {yyerror("Unknown character");}
 
 %%

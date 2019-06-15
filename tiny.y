@@ -2,14 +2,9 @@
 #include "tiny.h"
 #include <stdio.h>
 #include <stdlib.h>
-//#define YYSTYPE Node*
 
-/*nodeType *opr(int oper,int nops, ...);
-nodeType *id(int i);
-nodeType *intcon(int value);
-nodeType *realcon(float value);
-void freeNode(nodeType *p);*/
 Node* p;
+Node* temp;
 int yylex(void);
 void yyerror(char *s);
 static Node* saveTree;
@@ -17,12 +12,15 @@ static Node* saveTree;
 
 %union{
 	struct Node* nPtr;
+	int intcon;
+	float realcon;
+	int entry;
 }
-%token <nPtr> QString
-%token <nPtr> INTNUM
-%token <nPtr> REALNUM 
-%token <nPtr> ID 
-%token <nPtr> INT REAL
+%token <entry> QString
+%token <intcon> INTNUM
+%token <realcon> REALNUM 
+%token <entry> ID 
+%token INT REAL
 %token IF WRITE READ RETURN _BEGIN END MAIN WHILE
 %token ENDWHILE DO TO DOWNTO FOR ENDDO
 %nonassoc IFX
@@ -32,147 +30,166 @@ static Node* saveTree;
 %left '+' '-'
 %left '*' '/' 
 
-%type <nPtr> Program MethodDecl Type FormalParams Block FormalParam Statement LocalVarDecl
+%type <nPtr> Program MethodDecl FormalParams Block FormalParam Statement LocalVarDecl
 %type <nPtr> Statements AssignStmt ReturnStmt IfStmt WriteStmt ReadStmt FPList PrimaryExpr
-%type <nPtr> Expression BoolExpression ActualParams Mainornot APList MultiplicativeExpr
+%type <nPtr> Expression BoolExpression ActualParams APList MultiplicativeExpr
 %type <nPtr> WhileStmt DowhileStmt ForStmt
 
 %%
 
 Program:
 	Program MethodDecl {insert($1,$2);$$=$1;}
-	|MethodDecl	{p=newNode("Program");insert(p,$1);saveTree=p;$$=p;} 
+	|MethodDecl	{p=newNode(stmt);p->op=prog;insert(p,$1);saveTree=p;$$=p;} 
 	;
 
 MethodDecl:
-	  Type Mainornot ID '(' FPList ')' Block {p=newNode("MethodDecl");
-							insert(p,$1);
-							insert(p,$2);
-							insert(p,$3);
-							insert(p,$5);
-							insert(p,$7);
-							$$=p;}
-	;
-Mainornot:
-	  MAIN	{p=newNode("MAIN");$$=p;}
-	|	{p=newNode("NULL");
-		 $$=p;}
+	 INT MAIN ID '(' FPList ')' Block
+	{sym[($3)].vtype=intType;
+	(sym[($3)]).itype=mainfun;
+	$$=$7;
+	}
+	| 
+	 INT ID '(' FPList ')' Block 
+	{sym[($2)].vtype=intType;
+	sym[($2)].itype=fun;
+	$$=$6;
+	}
+	|
+	 REAL MAIN ID '(' FPList ')' Block 
+	{sym[($3)].vtype=realType;
+	sym[($3)].itype=mainfun;
+	$$=$7;
+	}
+	|
+	 REAL ID '(' FPList ')' Block 
+	{sym[($2)].vtype=realType;
+	sym[($2)].itype=fun;
+	$$=$6;
+	}
 	;
 
 FPList:
 	FormalParams {$$=$1;}
-	| 	{p=newNode("NULL");$$=p;}
+	| {$$=NULL;}	
 	;
 
 FormalParams:
-	  FormalParams ',' FormalParam {insert($1,$3);$$=$1;}
-	| FormalParam	{p=newNode("FormalParams");insert(p,$1);$$=p;}
+	  FormalParams ',' FormalParam 
+	| FormalParam	
 	;
 	 
 FormalParam:
-	   Type ID {p=newNode("FormalParam");insert(p,$1);insert(p,$2);$$=p;}
-	;
-
-Type:
-    	INT	{$$=$1;}
-	| REAL	{$$=$1;}
+	   INT ID {sym[($2)].vtype=intType;sym[($2)].itype=prm;}
+	|  REAL ID {sym[($2)].vtype=realType;sym[($2)].itype=prm;}
 	;
 
 Block:
-     	_BEGIN Statements END { p=newNode("Block");insert(p,$2);$$=p;}
+     	_BEGIN Statements END {$$=$2;}
 	;
 Statements:
-	  Statements Statement {insert($1,$2);$$=$1;}
-	| Statement {p=newNode("Statements");insert(p,$1);$$=p;}
+	  Statements Statement {if($2!=NULL)
+					insert($1,$2);
+				$$=$1;}
+	| Statement {p=newNode(stmt);p->op=stmts;
+		    if($1!=NULL)
+			insert(p,$1);
+		    $$=p;}
 	;
 
 Statement:
-	 Block {p=newNode("Statement");insert(p,$1);$$=p;}
-	| LocalVarDecl {p=newNode("Statement");insert(p,$1);$$=p;}
-	| AssignStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| ReturnStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| IfStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| WriteStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| ReadStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| WhileStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| DowhileStmt {p=newNode("Statement");insert(p,$1);$$=p;}
-	| ForStmt {p=newNode("Statement");insert(p,$1);$$=p;}
+	 Block {$$=$1;}
+	| LocalVarDecl {$$=NULL;}
+	| AssignStmt {$$=$1;}
+	| ReturnStmt {$$=$1;}
+	| IfStmt {$$=$1;}
+	| WriteStmt {$$=$1;}
+	| ReadStmt {$$=$1;}
+	| WhileStmt {$$=$1;}
+	| DowhileStmt {$$=$1;}
+	| ForStmt {$$=$1;}
 	;
 LocalVarDecl:
-	INT ID ';' {p=newNode("LocalVarDecl");insert(p,$1);insert(p,$2);$$=p;}
-	| REAL ID ';' {p=newNode("LocalVarDecl");insert(p,$1);insert(p,$2);$$=p;}
+	INT ID ';' {sym[($2)].vtype=intType;sym[($2)].itype=var;}
+	| REAL ID ';' {sym[($2)].vtype=realType;sym[($2)].itype=var;}
 	;
 
 AssignStmt:
-	 ID AS Expression ';' {p=newNode("AssignStmt");insert(p,$1);insert(p,$3);$$=p;}
+	 ID AS Expression ';' {p=newNode(stmt);p->op=assign;
+				temp=newNode(id);temp->entry=$1;
+				insert(p,temp);insert(p,$3);$$=p;}
 	;
 
 ReturnStmt:
-	  RETURN Expression ';' {p=newNode("ReturnStmr");insert(p,$2);$$=p;}
+	  RETURN Expression ';' {p=newNode(stmt);p->op=ret;insert(p,$2);$$=p;}
 	;
 IfStmt:
       	IF '(' BoolExpression ')' Statements %prec IFX
-	{p=newNode("IfStmt");insert(p,$3);insert(p,$5);$$=p;}
+	{p=newNode(stmt);p->op=ifstmt;insert(p,$3);insert(p,$5);$$=p;}
 	| IF '(' BoolExpression ')' Statements ELSE Statements 
-	{p=newNode("IfStmt");insert(p,$3);insert(p,$5);insert(p,$7);$$=p;}
+	{p=newNode(stmt);p->op=ifstmt;insert(p,$3);insert(p,$5);insert(p,$7);$$=p;}
 	;
 
 WriteStmt:
 	 WRITE '(' Expression ',' QString ')' ';'
-	{p=newNode("WriteStmt");insert(p,$3);insert(p,$5);$$=p;}
+	{p=newNode(stmt);p->op=wrt;insert(p,$3);temp=newNode(str);temp->entry=$5;insert(p,temp);$$=p;}
 	;
 
 ReadStmt:
 	READ '(' ID ',' QString ')' ';'
-	{p=newNode("ReadStmt");insert(p,$3);insert(p,$5);$$=p;}
+	{p=newNode(stmt);p->op=rd;temp=newNode(id);temp->entry=$3;insert(p,temp);temp=newNode(str);temp->entry=$5;insert(p,temp);$$=p;}
 	;
 
 WhileStmt:
 	 WHILE BoolExpression DO Statements ENDWHILE
-	{p=newNode("WhileStmt");insert(p,$2);insert(p,$4);$$=p;}
+	{p=newNode(stmt);p->op=whilestmt;insert(p,$2);insert(p,$4);$$=p;}
 	;
 
 DowhileStmt:
 	 DO Statements WHILE BoolExpression ';' 
-	{p=newNode("DowhileStmt");insert(p,$2);insert(p,$4);$$=p;}
+	{p=newNode(stmt);p->op=dostmt;insert(p,$2);insert(p,$4);$$=p;}
 	;
 
 ForStmt:
        FOR ID AS Expression TO Expression DO Statements ENDDO 
-	{p=newNode("ForStmt:Increment");insert(p,$2);insert(p,$4);insert(p,$6);insert(p,$8);$$=p;}
+	{p=newNode(stmt);p->op=forto;temp=newNode(id);temp->entry=$2;insert(p,temp);insert(p,$4);insert(p,$6);insert(p,$8);$$=p;}
 	| FOR ID AS Expression DOWNTO Expression DO Statements ENDDO
-	{p=newNode("ForStmt:Decrement");insert(p,$2);insert(p,$4);insert(p,$6);insert(p,$8);$$=p;}
+	{p=newNode(stmt);p->op=fordownto;temp=newNode(id);temp->entry=$2;insert(p,temp);insert(p,$4);insert(p,$6);insert(p,$8);$$=p;}
 	;
 
 Expression:
-	  Expression '+' MultiplicativeExpr	{insert($1,$3);p=newNode("operation:+");insert($1,p);$$=$1;}
-	|  Expression '-' MultiplicativeExpr 	{insert($1,$3);p=newNode("operation:-");insert($1,p);$$=$1;}
-	|  MultiplicativeExpr  {p=newNode("Expression");insert(p,$1);$$=p;}
+	  Expression '+' MultiplicativeExpr	{p=newNode(exp);p->op=add;insert(p,$1);insert(p,$3);$$=p;}
+	|  Expression '-' MultiplicativeExpr 	{p=newNode(exp);p->op=sub;insert(p,$1);insert(p,$3);$$=p;}
+	|  MultiplicativeExpr  {$$=$1;}
 	;
 
 MultiplicativeExpr:
-	   MultiplicativeExpr '*' PrimaryExpr	{insert($1,$3);p=newNode("operation:*");insert($1,p);$$=$1;}
-	|  MultiplicativeExpr '/' PrimaryExpr	{insert($1,$3);p=newNode("operation:/");insert($1,p);$$=$1;}
-	|  PrimaryExpr  {p=newNode("MultiplicativeExpr");insert(p,$1);$$=p;}
+	   MultiplicativeExpr '*' PrimaryExpr	{p=newNode(exp);p->op=mult;insert(p,$1);insert(p,$3);$$=p;}
+	|  MultiplicativeExpr '/' PrimaryExpr	{p=newNode(exp);p->op=dv;insert(p,$1);insert(p,$3);$$=p;}
+	|  PrimaryExpr  {$$=$1;}
 	;
 PrimaryExpr:
-	  INTNUM	{p=newNode("PrimaryExpr");insert(p,$1);$$=p;}
-	|  REALNUM	{p=newNode("PrimaryExpr");insert(p,$1);$$=p;}
-	|  ID	{p=newNode("PrimaryExpr");insert(p,$1);$$=p;}
-	|  '(' Expression ')'	{p=newNode("PrimaryExpr");insert(p,$2);$$=p;}
-	|  ID '(' APList ')'	{p=newNode("PrimaryExpr");insert(p,$1);insert(p,$3);$$=p;}
+	  INTNUM	{p=newNode(con);p->vtype=intType;(p->val).intNum=$1;$$=p;}
+	|  REALNUM	{p=newNode(con);p->vtype=realType;(p->val).realNum=$1;$$=p;}
+	|  ID	{p=newNode(id);p->entry=$1;$$=p;}
+	|  '(' Expression ')'	{$$=$2;}
+	|  ID '(' APList ')'	{p=newNode(exp);p->op=call;
+				temp=newNode(id);temp->entry=$1;
+				insert(p,temp);
+				if($3!=NULL)
+					insert(p,$3);
+				$$=p;}
 	;
 BoolExpression:
-	     Expression EQ Expression {p=newNode("BoolExpression");insert(p,$1);insert(p,$3);$$=p;}
-	|    Expression NE Expression	{p=newNode("BoolExpression");insert(p,$1);insert(p,$3);$$=p;}
+	     Expression EQ Expression {p=newNode(exp);p->op=eql;insert(p,$1);insert(p,$3);$$=p;}
+	|    Expression NE Expression	{p=newNode(exp);p->op=neq;insert(p,$1);insert(p,$3);$$=p;}
 	;
 APList:
 	   ActualParams {$$=$1;}
-	|  {p=newNode("NULL");$$=p;}
+	|  {$$=NULL;}
 	;
 ActualParams:
 	    ActualParams ',' Expression {insert($1,$3);$$=$1;}
-	|   Expression	{p=newNode("ActualParams");insert(p,$1);$$=p;}
+	|   Expression	{p=newNode(exp);p->op=param;insert(p,$1);$$=p;}
 	;
 %%
 void yyerror(char* s)
@@ -182,6 +199,6 @@ void yyerror(char* s)
 int main(void)
 {
 	yyparse();
-	printTree(saveTree,0);
+	printTree(saveTree);
 	return 0;
 }

@@ -1,47 +1,43 @@
-//typedef enum { typeCon, typeId, typeOpr} nodeEnum;
-//typedef enum {op, intcon, realcon, id, rw} Type;
-//typedef enum {MD, FP, BL, TY, stmt, LVD, AS, RT, IF, WT, RD, 
+typedef enum nodeType{ stmt, id, exp, con,str}nodeType;
+typedef enum oprType{assign,ifstmt,whilestmt,dostmt,param,forto,fordownto,rd,wrt,stmts,prog,add,sub,mult,dv,eql,neq,call,ret}oprType;
+typedef enum {intType,realType}valueType;
+typedef enum {fun,var,prm,mainfun}idType; 
 
-/*typedef struct{
-	nodeEnum type;
-	int value;
-}intConNodeType;
-
-typedef struct{
-	nodeEnum type;
-	float value;
-}realConNodeType;
-
-typedef struct{
-	nodeEnum type;
-	char* name; 
-}idNodeType;
-
-typedef struct{
-	nodeEnum type;
-	int oper;
-	int nops;
-	union nodeTypeTag *op[1];
-}oprNodeType;
-
-typedef union nodeTypeTag{
-	nodeEnum type;
-	intConNodeType icon;
-	realConNodetype rcon;
-	idNodeType id;
-	oprNodeType opr;
-}nodeType;
-*/
 #include<string.h>
 #include<stdio.h>
 #include<stdlib.h>
+
+typedef struct{
+	char name[100];
+	valueType vtype;
+	idType itype;
+}symbol;
+
+extern int symbolNumber;
+extern int strNumber;
+
+symbol sym[100];
+char strs[20][100];
+
+typedef union{
+	int intNum;
+	float realNum;
+}nodeValue;
+
 typedef struct Node{
+	nodeType type;
+	nodeValue val;
+	oprType op;
+	valueType vtype;
+	int entry;
 	struct Node* child;
 	struct Node* sibling;
 	int noChild;
-	char name[100];
 }Node;
 
-Node* newNode(char *name);
+Node* newNode(nodeType);
+int find(char*);
 void insert(Node* parent,Node* child);
-void printTree(Node* t,int depth);
+void printTree(Node* t);
+void genExp(Node* t, oprType op);
+int storeStr(char*);

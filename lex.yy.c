@@ -509,11 +509,10 @@ char *yytext;
 void yyerror(char *s);
 char* s;
 char buf[100];
-//extern Node* yylval;
 
-#line 514 "lex.yy.c"
+#line 513 "lex.yy.c"
 
-#line 516 "lex.yy.c"
+#line 515 "lex.yy.c"
 
 #define INITIAL 0
 #define STRING 1
@@ -732,10 +731,10 @@ YY_DECL
 		}
 
 	{
-#line 25 "tiny.l"
+#line 24 "tiny.l"
 
 
-#line 738 "lex.yy.c"
+#line 737 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -794,193 +793,193 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 27 "tiny.l"
+#line 26 "tiny.l"
 {BEGIN COMMENT;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "tiny.l"
+#line 27 "tiny.l"
 {BEGIN 0;}
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 29 "tiny.l"
+#line 28 "tiny.l"
 {;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 30 "tiny.l"
+#line 29 "tiny.l"
 {BEGIN STRING;s=buf;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 31 "tiny.l"
+#line 30 "tiny.l"
 {*s++ ='\n';}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 32 "tiny.l"
+#line 31 "tiny.l"
 {*s++ ='\t';}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 33 "tiny.l"
+#line 32 "tiny.l"
 {*s++ ='\"';}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 34 "tiny.l"
-{*s=0;BEGIN 0;yylval.nPtr=newNode(buf);return QString;}
+#line 33 "tiny.l"
+{*s=0;BEGIN 0;yylval.entry=storeStr(buf);return QString;}
 	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 35 "tiny.l"
+#line 34 "tiny.l"
 {printf("invalid string");}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 36 "tiny.l"
+#line 35 "tiny.l"
 {*s++ =*yytext;}
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 37 "tiny.l"
+#line 36 "tiny.l"
 {;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 38 "tiny.l"
+#line 37 "tiny.l"
 {return IF;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 39 "tiny.l"
+#line 38 "tiny.l"
 {return ELSE;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 40 "tiny.l"
+#line 39 "tiny.l"
 {return WRITE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 41 "tiny.l"
+#line 40 "tiny.l"
 {return READ;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 42 "tiny.l"
+#line 41 "tiny.l"
 {return RETURN;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 43 "tiny.l"
+#line 42 "tiny.l"
 {return (_BEGIN);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 44 "tiny.l"
+#line 43 "tiny.l"
 {return END;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 45 "tiny.l"
+#line 44 "tiny.l"
 {return (MAIN);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 46 "tiny.l"
-{yylval.nPtr=newNode("INT");return (INT);}
+#line 45 "tiny.l"
+{return (INT);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 47 "tiny.l"
-{yylval.nPtr=newNode("REAL");return (REAL);}
+#line 46 "tiny.l"
+{return (REAL);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "tiny.l"
+#line 47 "tiny.l"
 {return (WHILE);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "tiny.l"
+#line 48 "tiny.l"
 {return (ENDWHILE);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 50 "tiny.l"
+#line 49 "tiny.l"
 {return (DO);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 51 "tiny.l"
+#line 50 "tiny.l"
 {return (TO);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 52 "tiny.l"
+#line 51 "tiny.l"
 {return (DOWNTO);}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 53 "tiny.l"
+#line 52 "tiny.l"
 {return (FOR);}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 54 "tiny.l"
+#line 53 "tiny.l"
 {return (ENDDO);}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 55 "tiny.l"
+#line 54 "tiny.l"
 {return *yytext;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 56 "tiny.l"
+#line 55 "tiny.l"
 {return AS;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 57 "tiny.l"
+#line 56 "tiny.l"
 {return EQ;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 58 "tiny.l"
+#line 57 "tiny.l"
 {return NE;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 59 "tiny.l"
-{ yylval.nPtr=newNode(yytext); return ID;}
+#line 58 "tiny.l"
+{yylval.entry=find(yytext);return ID;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 60 "tiny.l"
-{yylval.nPtr=newNode(yytext);return INTNUM;}
+#line 59 "tiny.l"
+{yylval.intcon=atoi(yytext);return INTNUM;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 61 "tiny.l"
-{yylval.nPtr=newNode(yytext);return REALNUM;}
+#line 60 "tiny.l"
+{yylval.realcon=atof(yytext);return REALNUM;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 62 "tiny.l"
+#line 61 "tiny.l"
 {yyerror("Unknown character");}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 64 "tiny.l"
+#line 63 "tiny.l"
 ECHO;
 	YY_BREAK
-#line 983 "lex.yy.c"
+#line 982 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STRING):
 case YY_STATE_EOF(COMMENT):
@@ -1987,7 +1986,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 64 "tiny.l"
+#line 63 "tiny.l"
 
 int yywrap(){
 	return 1;
